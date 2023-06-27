@@ -249,10 +249,7 @@ public class LBPool {
 				}
 			}
 
-			// Choose a member randomly from the eligible members
-			Random random = new Random();
-			int randomIndex = random.nextInt(eligibleMembers.size());
-			String memberToPick = eligibleMembers.get(randomIndex);
+			String memberToPick = eligibleMembers.get(0);
 
 			log.debug("Member {} picked using Least Connection", memberToPick);
 			return memberToPick;
