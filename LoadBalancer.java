@@ -350,12 +350,18 @@ ILoadBalancerService, IOFMessageListener {
 					if(pool.lbMethod == LBPool.LEAST_CONNECTION && memberConnection != null){
 						for (String memberId : pool.members) {
 							memberConnection.put(memberId, getActiveConnectionCount(memberId));
+							// Setelah memperbarui status member
+							if(memberConnection.containsKey(memberId) && memberConnection.get(memberId) >= 100){
+								memberConnection.put(memberId, memberConnection.get(memberId) - 1);
+							}
+
 						}
 					}
 
 					LBMember member = members.get(pool.pickMember(client,memberPortBandwidth,memberWeights,memberConnection,memberStatus));
 					if(member == null)			//fix dereference violations
 						return Command.CONTINUE;
+					member.incrementConnections();
 
 					log.info("Member " + IPv4Address.of(member.address) + " has been picked by the load balancer.");
 					// for chosen member, check device manager and find and push routes, in both directions                    
@@ -374,7 +380,7 @@ ILoadBalancerService, IOFMessageListener {
 		return Command.CONTINUE;
 	}
 
-	private int getActiveConnectionCount(String memberId) {
+	public int getActiveConnectionCount(String memberId) {
 		LBMember member = members.get(memberId);
 		if (member != null) {
 			return member.getActiveConnections();
